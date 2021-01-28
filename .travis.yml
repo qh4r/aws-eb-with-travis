@@ -1,0 +1,21 @@
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -t qh4r/react-tests -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run -e CI=true qh4r/react-tests npm run test
+
+after_success:
+  - docker build -t qh4r/aws-eb-fun-client -f ./client/Dockerfile ./client
+  - docker build -t qh4r/aws-eb-fun-server -f ./server/Dockerfile ./server
+  - docker build -t qh4r/aws-eb-fun-worker  -f ./worker/Dockerfile ./worker
+  - docker build -t qh4r/aws-eb-fun-nginx -f ./nginx/Dockerfile ./nginx
+
+  - docker login -u "$DOCKER_ID" -p "$DOCKER_TOKEN"
+  - docker push qh4r/aws-eb-fun-client
+  - docker push qh4r/aws-eb-fun-server
+  - docker push qh4r/aws-eb-fun-worker
+  - docker push qh4r/aws-eb-fun-nginx
