@@ -14,8 +14,23 @@ after_success:
   - docker build -t qh4r/aws-eb-fun-worker  -f ./worker/Dockerfile ./worker
   - docker build -t qh4r/aws-eb-fun-nginx -f ./nginx/Dockerfile ./nginx
 
+# alternatywny login
+# - echo "$DOCKER_TOKEN" | docker login -u "$DOCKER_ID" --password-stdin
   - docker login -u "$DOCKER_ID" -p "$DOCKER_TOKEN"
   - docker push qh4r/aws-eb-fun-client
   - docker push qh4r/aws-eb-fun-server
   - docker push qh4r/aws-eb-fun-worker
   - docker push qh4r/aws-eb-fun-nginx
+
+deploy:
+  provider: elasticbeanstalk
+  region: "eu-central-1"
+  app: "multi-docker"
+  env: "Multidocker-env"
+  bucket_name: "elasticbeanstalk-eu-central-1-644539583708"
+  bucket_path: "multi-docker"
+  on:
+    branch: master
+  access_key_id: $AWS_ACCESS_KEY
+  secret_access_key: $AWS_SECRET_KEY
+
